@@ -1,0 +1,41 @@
+name: build
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: moosefs/mfsbuilder:trixie
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: |
+          autoreconf -f -i
+          ./configure --prefix=/usr --mandir=/share/man --sysconfdir=/etc \
+            --localstatedir=/var/lib --with-default-user=mfs --with-default-group=mfs \
+            --disable-all --enable-mfsmaster
+          make DESTDIR=/tmp/mfs install
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfsmaster
+          path: /tmp/mfs/usr/sbin/mfsmaster
+
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: startsWith(github.ref, 'refs/heads/mod/')
+    needs: build
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mfsmaster
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=${{ github.ref_name}}-${{ github.run_number }}
+          gh release create $VERSION mfsmaster --title $VERSION --generate-notes -R ${{ github.repository }}
