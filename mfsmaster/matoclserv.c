@@ -5379,12 +5379,16 @@ void matoclserv_sclass_create(matoclserventry *eptr,const uint8_t *data,uint32_t
 				}
 				sclass_maskorgroup_to_labelexpr(arch.labelexpr,old_labelmasks,arch.labelscnt);
 			}
+/*
 			if ((arch.ec_data_chksum_parts&0xF)>1 || (trash.ec_data_chksum_parts&0xF)>1) {
 				mfs_log(MFSLOG_SYSLOG,MFSLOG_NOTICE,"CLTOMA_SCLASS_CREATE - redundancy levels > 1 supported only in pro version");
 				status = MFS_ERROR_EINVAL;
 			} else {
+*/
 				status = sclass_create_entry(nleng,name,dleng,desc,priority,export_group,admin_only,labels_mode,arch_mode,arch_delay,arch_min_size,min_trashretention,&create,&keep,&arch,&trash);
+/*
 			}
+*/
 		} else {
 			status = MFS_ERROR_EINVAL;
 		}
@@ -5559,12 +5563,16 @@ void matoclserv_sclass_change(matoclserventry *eptr,const uint8_t *data,uint32_t
 				}
 				sclass_maskorgroup_to_labelexpr(arch.labelexpr,arch_labelmasks,arch.labelscnt);
 			}
+/*
 			if ((arch.ec_data_chksum_parts&0xF)>1 || (trash.ec_data_chksum_parts&0xF)>1) {
 				mfs_log(MFSLOG_SYSLOG,MFSLOG_NOTICE,"CLTOMA_SCLASS_CHANGE - redundancy levels > 1 supported only in pro version");
 				status = MFS_ERROR_EINVAL;
 			} else {
+*/
 				status = sclass_change_entry(nleng,name,chgmask,&dleng,desc,&priority,&export_group,&admin_only,&labels_mode,&arch_mode,&arch_delay,&arch_min_size,&min_trashretention,&create,&keep,&arch,&trash);
+/*
 			}
+*/
 		} else {
 			status = MFS_ERROR_EPERM_NOTADMIN;
 		}
