@@ -2018,30 +2018,30 @@ static inline uint8_t chunk_check_forcekeep_condidiotns_for_ec(storagemode *sm,u
 		switch (labels_mode) {
 			case LABELS_MODE_LOOSE:
 				if (has_copies) { // copy
-					if (replallowed < ec_data_parts + 2*ec_chksum_parts) {
+					if (replallowed < ec_data_parts + 1*ec_chksum_parts) {
 						usekeep = 2;
 					}
 				} else { // EC
-					if (allvalid < ec_data_parts + ec_chksum_parts) {
+					if (allvalid <= ec_data_parts + 0*ec_chksum_parts) {
 						usekeep = 3;
 					}
 				}
 				break;
 			case LABELS_MODE_STD:
 				if (has_copies) {
-					if (sm->replallowed < ec_data_parts + 2*ec_chksum_parts) {
+					if (sm->replallowed < ec_data_parts + 1*ec_chksum_parts) {
 						usekeep = 2;
 					}
 					if (sm->labelscnt==2) {
-						if (sm->data_replallowed + sm->both_replallowed < ec_data_parts + ec_chksum_parts) {
+						if (sm->data_replallowed + sm->both_replallowed < ec_data_parts + 0*ec_chksum_parts) {
 							usekeep = 2;
 						}
-						if (sm->chksum_replallowed + sm->both_replallowed < 2*ec_chksum_parts) {
+						if (sm->chksum_replallowed + sm->both_replallowed < 1*ec_chksum_parts) {
 							usekeep = 2;
 						}
 					}
 				} else {
-					if (allvalid < ec_data_parts + ec_chksum_parts) {
+					if (allvalid <= ec_data_parts + 0*ec_chksum_parts) {
 						usekeep = 3;
 					}
 					if (sm->labelscnt==1) {
@@ -2059,19 +2059,19 @@ static inline uint8_t chunk_check_forcekeep_condidiotns_for_ec(storagemode *sm,u
 				break;
 			case LABELS_MODE_STRICT:
 				if (has_copies) {
-					if (sm->replallowed < ec_data_parts + 2*ec_chksum_parts) {
+					if (sm->replallowed < ec_data_parts + 1*ec_chksum_parts) {
 						usekeep = 2;
 					}
 					if (sm->labelscnt==2) {
-						if (sm->data_replallowed + sm->both_replallowed < ec_data_parts + ec_chksum_parts) {
+						if (sm->data_replallowed + sm->both_replallowed < ec_data_parts + 0*ec_chksum_parts) {
 							usekeep = 2;
 						}
-						if (sm->chksum_replallowed + sm->both_replallowed < 2*ec_chksum_parts) {
+						if (sm->chksum_replallowed + sm->both_replallowed < 1*ec_chksum_parts) {
 							usekeep = 2;
 						}
 					}
 				} else {
-					if (sm->allvalid < ec_data_parts + ec_chksum_parts) {
+					if (sm->allvalid <= ec_data_parts + 0*ec_chksum_parts) {
 						usekeep = 3;
 					}
 					if (sm->labelscnt==2) {
@@ -6338,15 +6338,15 @@ void chunk_do_jobs(chunk *c,uint8_t mode,uint32_t now,uint8_t extrajob) {
 					}
 				}
 			}
-			dataec_both_labels_limit = (sm->chksum_allvalid + sm->both_allvalid) - 2 * ec_chksum_parts - ec_data_parts_on_both;
-			chksumec_both_labels_limit = (sm->data_allvalid + sm->both_allvalid) - (ec_data_parts + ec_chksum_parts) - ec_chksum_parts_on_both;
+			dataec_both_labels_limit = (sm->chksum_allvalid + sm->both_allvalid) - 1 * ec_chksum_parts - ec_data_parts_on_both;
+			chksumec_both_labels_limit = (sm->data_allvalid + sm->both_allvalid) - (ec_data_parts + 0*ec_chksum_parts) - ec_chksum_parts_on_both;
 		}
 		if (usekeep) {
 			if (usekeep==2 && inforec.forcekeep<10) {
-				mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"chunk %016"PRIX64"_%08"PRIX32": not enough servers to safely convert to EC format (%u servers needed) - using KEEP mode",c->chunkid,c->version,ec_chksum_parts*2+ec_data_parts);
+				mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"chunk %016"PRIX64"_%08"PRIX32": not enough servers to safely convert to EC format (%u servers needed) - using KEEP mode",c->chunkid,c->version,ec_chksum_parts*1+ec_data_parts);
 			}
 			if (usekeep==3 && inforec.forcekeep<10) {
-				mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"chunk %016"PRIX64"_%08"PRIX32": not enough servers to maintain EC format (%u servers needed) - using KEEP mode",c->chunkid,c->version,ec_chksum_parts+ec_data_parts);
+				mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"chunk %016"PRIX64"_%08"PRIX32": not enough servers to maintain EC format (%u servers needed) - using KEEP mode",c->chunkid,c->version,ec_chksum_parts*0+ec_data_parts);
 			}
 			if (usekeep>=2 && inforec.forcekeep==10) {
 				mfs_log(MFSLOG_SYSLOG,MFSLOG_WARNING,"there are more chunks that cannot be converted to EC or has to be converted back to copy format - no more messages in this loop - change definition of storage classes or add more servers");
@@ -8457,13 +8457,13 @@ uint8_t chunk_labelset_can_be_fulfilled(storagemode *sm) {
 				if (sm->allvalid<(data_parts+chksum_parts)) {
 					return CBF_NO;
 				}
-				if (sm->allvalid<(data_parts+2*chksum_parts)) {
+				if (sm->allvalid<(data_parts+1*chksum_parts)) {
 					return CBF_ECKEEP;
 				}
-				if (sm->overloaded<(data_parts+2*chksum_parts)) {
+				if (sm->overloaded<(data_parts+1*chksum_parts)) {
 					return CBF_NOSPACE;
 				}
-				if (sm->replallowed<(data_parts+2*chksum_parts)) {
+				if (sm->replallowed<(data_parts+1*chksum_parts)) {
 					return CBF_OVERLOADED;
 				}
 			} else { // sm->labelscnt==2
@@ -8472,19 +8472,19 @@ uint8_t chunk_labelset_can_be_fulfilled(storagemode *sm) {
 				 || sm->chksum_allvalid+sm->both_allvalid < chksum_parts) {
 					return CBF_NO;
 				}
-				if (sm->allvalid < (data_parts+2*chksum_parts)
-				 || sm->data_allvalid+sm->both_allvalid < data_parts + chksum_parts
-				 || sm->chksum_allvalid+sm->both_allvalid < 2*chksum_parts) {
+				if (sm->allvalid < (data_parts+1*chksum_parts)
+				 || sm->data_allvalid+sm->both_allvalid < data_parts + 0*chksum_parts
+				 || sm->chksum_allvalid+sm->both_allvalid < 1*chksum_parts) {
 					return CBF_ECKEEP;
 				}
-				if (sm->overloaded < (data_parts+2*chksum_parts)
-				 || sm->data_overloaded+sm->both_overloaded < data_parts + chksum_parts
-				 || sm->chksum_overloaded+sm->both_overloaded < 2*chksum_parts) {
+				if (sm->overloaded < (data_parts+1*chksum_parts)
+				 || sm->data_overloaded+sm->both_overloaded < data_parts + 0*chksum_parts
+				 || sm->chksum_overloaded+sm->both_overloaded < 1*chksum_parts) {
 					return CBF_NOSPACE;
 				}
-				if (sm->replallowed < (data_parts+2*chksum_parts)
-				 || sm->data_replallowed+sm->both_replallowed < data_parts + chksum_parts
-				 || sm->chksum_replallowed+sm->both_replallowed < 2*chksum_parts) {
+				if (sm->replallowed < (data_parts+1*chksum_parts)
+				 || sm->data_replallowed+sm->both_replallowed < data_parts + 0*chksum_parts
+				 || sm->chksum_replallowed+sm->both_replallowed < 1*chksum_parts) {
 					return CBF_OVERLOADED;
 				}
 			}
@@ -8492,13 +8492,13 @@ uint8_t chunk_labelset_can_be_fulfilled(storagemode *sm) {
 			if (allcscnt<(data_parts+chksum_parts)) {
 				return CBF_NO;
 			}
-			if (allcscnt<(data_parts+2*chksum_parts)) {
+			if (allcscnt<(data_parts+1*chksum_parts)) {
 				return CBF_ECKEEP;
 			}
-			if (olcscnt<(data_parts+2*chksum_parts)) {
+			if (olcscnt<(data_parts+1*chksum_parts)) {
 				return CBF_NOSPACE;
 			}
-			if (stdcscnt<(data_parts+2*chksum_parts)) {
+			if (stdcscnt<(data_parts+1*chksum_parts)) {
 				return CBF_OVERLOADED;
 			}
 		}
